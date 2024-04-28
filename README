@@ -1,0 +1,69 @@
+# Database Scripts for Sprocket
+
+Simply put, the normal operation of our hosted Sprocket instance in service of
+MLE, we have to do certain bit of updating the database each season to prepare
+for the next season's events: things like intent forms, creating season
+schedules, and creating matches for the playoffs as they progress. This set of
+scripts does each of those things listed, and a few others. 
+
+## Creating Matches
+To create the appropriate data rows for match scheduling during the season,
+Sprocket requires quite a few entries. 
+
+### MLEDB Side
+
+- Entities
+    - Season
+    - Match
+    - Fixture
+    - Series
+- Relationships
+    - A season contains matches (10 per season).
+    - Each match contains fixtures, one per pair of teams.
+    - Each fixture contains up to 10 series, one per game mode and league/skill group that the
+      pair of teams has and is playing.
+
+### Sprocket Side
+
+- Entities
+    - Schedule Group
+    - Schedule Fixture
+    - Match Parent
+    - Match
+- Relationships
+    - A schedule group can be a season or a phase of a season, and contain other
+      schedule groups.
+        - So, we have an SG for season 17, as well as for each week of season 17.
+    - A schedule group contains zero or more schedule fixtures, one for each
+      pair of teams.
+    - A schedule fixture contains up to 10 match parents, one per game mode and
+      skill group combo
+    - Each match parent contains one match. The match parent is a
+      Sprocket-schema-only device we use to distinguish between scrims, matches,
+      and events, each of which gets the same data stuffed into a match entity. 
+
+## Prerequisites
+The process to create matches begins with a schedule from MLE League Ops. This
+will generally consist of a csv with fields like Match/Week Number, Start
+Date, End Date, Home Team, Away Team, and which Leagues/Skill Groups play. The
+script `convertInputs.py` is an example of how one might take the 'master
+schedule' from LO and parse it into the various pieces we need. In particular,
+the `createSeasonSchedule.py` script requires four thing to be done before it
+can run successfully:
+
+### MLEDB Season and Matches
+Matches need a season, match number, start datetime, and end datetime. Upload via CSV or
+create manually. 
+
+### Sprocket Schedule Groups
+One for the season, and one for each phase of the season (week number or playoff
+round). Upload via CSV or create manually. 
+
+### A Properly Formatted Input CSV
+One row per *set of 5 rounds to be played*, termed a `match` in the Sprocket
+schema and a `series` in MLEDB. Each of the form
+
+(Gamemode, League, Match, Home, Away, Home Franchise ID, Away Franchise ID)
+
+### Metadata for MLEDB Matches and Sprocket SGs
+As preamble to `createSeasonSchedule.py`. You can find the format in that file. 
