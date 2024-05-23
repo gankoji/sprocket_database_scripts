@@ -22,6 +22,7 @@ gamemodes = ['Doubles', 'Standard']
 leagues = ['Foundation', 'Academy', 'Champion', 'Master', 'Premier']
 
 schedule_groups = {}
+schedule_fixtures = []
 matches = []
 with open('input_data/Schedule_Season_17_-_MatchData_1.csv') as csvfile:
     reader = csv.reader(csvfile)
@@ -39,6 +40,8 @@ with open('input_data/Schedule_Season_17_-_MatchData_1.csv') as csvfile:
         home_name = row[5]
         away_id = franchises[away_name]
         home_id = franchises[home_name]
+
+        schedule_fixtures.append((match_num, home_id, away_id))
         # Format: Gamemode,League,Match,Home,Away,Home Franchise ID,Away
         # Franchise ID
         for mode in gamemodes:
@@ -69,6 +72,12 @@ with open('input_data/season_17_schedule_groups.csv', 'w') as outfile:
     for _,v in schedule_groups.items():
         desc = f'Match {v[0]}'
         writer.writerow([v[1], v[2], desc])
+
+with open('input_data/season_17_schedule_fixtures.csv', 'w') as outfile:
+    writer = csv.writer(outfile)
+    writer.writerow(['match_number', 'home_team', 'away_team'])
+    for v in schedule_fixtures:
+        writer.writerow(v)
 
 with open('input_data/season_17_matches.csv', 'w') as outfile:
     writer = csv.writer(outfile)
