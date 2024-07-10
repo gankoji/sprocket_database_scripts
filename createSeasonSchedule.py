@@ -28,17 +28,17 @@ match2scheduleGroup = {
     10: 229,
 }
 
-matchNumberToId = {
-    1:  115,
-    2:  116,
-    3:  117,
-    4:  118,
-    5:  119,
-    6:  120,
-    7:  121,
-    8:  122,
-    9:  123,
-    10: 124,
+matchDetails = {
+    1:  (115, 'Something'),
+    2:  (116, 'Something'),
+    3:  (117, 'Something'),
+    4:  (118, 'Something'),
+    5:  (119, 'Something'),
+    6:  (120, 'Something'),
+    7:  (121, 'Something'),
+    8:  (122, 'Something'),
+    9:  (123, 'Something'),
+    10: (124, 'Something'),
 }
 
 # Ok with these models in hand, this is pretty straightforward
@@ -68,6 +68,7 @@ with engine.connect() as conn:
             awayId = int(row[6])
             scheduleGroupId = match2scheduleGroup[matchNumber]
             
+            print('HAI')
             # Sprocket Path
             try:
                 fixture = objects.sScheduleFixture(
@@ -102,12 +103,12 @@ with engine.connect() as conn:
             # MLEDB Path
             try:
                 # This fixture already exists. Grab it instead
-                query = f'SELECT id FROM mledb.fixture WHERE home_name = \'{homeName}\' AND away_name=\'{awayName}\' AND match_id={matchNumberToId[matchNumber]}'
+                query = f'SELECT id FROM mledb.fixture WHERE home_name = \'{homeName}\' AND away_name=\'{awayName}\' AND match_id={matchDetails[matchNumber][0]}'
                 result = conn.execute(text(query))
 
                 if result.rowcount == 0:
                     fixture = objects.mFixture(
-                        match_id=matchNumberToId[matchNumber],
+                        match_id=matchDetails[matchNumber][0],
                         home_name=homeName,
                         away_name=awayName
                     )
