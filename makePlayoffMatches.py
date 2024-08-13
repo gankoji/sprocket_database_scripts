@@ -1,7 +1,10 @@
 from sqlalchemy import create_engine, text
 from database import objects
+from dotenv import load_dotenv
 import os
 import csv
+
+load_dotenv()
 
 credstr = os.environ.get('POSTGRES_CREDS') # format is username:password
 engine = create_engine(f'postgresql+psycopg2://{credstr}@spr.ocket.cloud:30000/sprocket_main')
@@ -15,19 +18,17 @@ leaguestr2skillgroupid = {
 }
 
 match2scheduleGroup = {
-    20:218,
-    21:217,
-    22:216,
-    23:215,
-    24:214,
+    21:238,
+    22:239,
+    23:240,
+    24:242,
 }
 
 matchDetails = {
-    20: (109, "2024-01-08 05:00:00.000", "2024-01-15 05:00:00.000"),
-    21: (110, "2024-01-08 05:00:00.000", "2024-01-15 05:00:00.000"),
-    22: (111, "2024-01-15 05:00:00.000", "2024-01-22 05:00:00.000"),
-    23: (112, "2024-01-22 05:00:00.000", "2024-01-29 05:00:00.000"),
-    24: (113, "2024-01-29 05:00:00.000", "2024-02-05 05:00:00.000"),
+    21: (126, "2024-08-08 05:00:00.000", "2024-08-15 05:00:00.000"),
+    22: (127, "2024-08-15 05:00:00.000", "2024-08-22 05:00:00.000"),
+    23: (128, "2024-08-22 05:00:00.000", "2024-08-29 05:00:00.000"),
+    24: (129, "2024-09-02 05:00:00.000", "2024-09-05 05:00:00.000"),
 }
 # Ok with these models in hand, this is pretty straightforward
 # For each line in DK's match export
@@ -37,11 +38,11 @@ matchDetails = {
 # Arrow indicates ID of previous object necessary to create next
 with engine.connect() as conn:
     rollback = False
-    with open('playoffs.csv') as csvfile:
+    with open('inputs/playoffs_week2.csv') as csvfile:
         reader = csv.reader(csvfile)
         for i,row in enumerate(reader):
-            if i == 0:
-                continue
+            # if i == 0:
+            #     continue
             gameModeStr = row[0]
             if gameModeStr == 'Standard':
                 gameModeId = 14
