@@ -38,11 +38,11 @@ matchDetails = {
 # Arrow indicates ID of previous object necessary to create next
 with engine.connect() as conn:
     rollback = False
-    with open('inputs/playoffs_week2.csv') as csvfile:
+    with open('inputs/playoffs_week4.csv') as csvfile:
         reader = csv.reader(csvfile)
         for i,row in enumerate(reader):
-            # if i == 0:
-            #     continue
+            if i == 0:
+                continue
             gameModeStr = row[0]
             if gameModeStr == 'Standard':
                 gameModeId = 14
