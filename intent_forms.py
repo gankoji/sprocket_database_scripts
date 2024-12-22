@@ -6,9 +6,11 @@ credstr = os.environ.get('POSTGRES_CREDS') # format is username:password
 engine = create_engine(f'postgresql+psycopg2://{credstr}@spr.ocket.cloud:30000/sprocket_main')
 
 basicUpdateQuery = """
-    UPDATE mledb.player AS mp
-    SET team_name='{}'
-    WHERE mp.mleid={}
+UPDATE mledb.player AS mp
+SET team_name=c.new_team
+FROM (values
+{}) as c(mleid, new_team)
+WHERE mp.mleid=c.mleid
 """
 
 selectQuery = """
@@ -20,7 +22,7 @@ fullPlayerTable = """
     SELECT * FROM mledb.player AS mp
 """
 
-dryRun = True
+dryRun = False
 players = {}
 
 with engine.connect() as conn:
@@ -29,7 +31,7 @@ with engine.connect() as conn:
     for row in fullTable:
         did, name, mleid = row[14], row[6], row[5]
         # Default to FP, since if they didn't respond that's where they're headed
-        players[mleid] = (did, name, 'FP')
+        players[did] = (mleid, name, 'FP')
         
     # Read the responses from the input CSV file
     with open('inputs/mlebb_retentions.csv') as csvfile:
@@ -40,28 +42,30 @@ with engine.connect() as conn:
 
             # This is the format of the CSV from MLEBB
             # discord id,name,mleid,retention,team,league
-            did, name, mleid, resp, team, _ = row
+            did, name, _, resp, team, _ = row
 
             # Responses are one of (Retain, FA, Former Player)
             if resp == 'Retention Eligible':
                 new_team = team
-            elif resp == 'Free Agent':
+            elif resp == 'Release to FA':
                 new_team = 'FA'
             else:
                 new_team = 'FP'
             
             # Update the players dictionary with the new response
-            players[mleid] = (did, name, new_team)
+            mleid, name, _ = players[did]
+            players[did] = (mleid, name, new_team)
             
-    for mleid, (did, name, new_team) in players.items():
-        # Now let's put it into the DB:
-        if dryRun:
-            print(f'Updating player {name} ({mleid}) to team {new_team}')
-            queryStr = selectQuery.format(mleid)
-            res = conn.execute(text(queryStr))
-            print([row[5] for row in res])
-        else:
-            queryStr = basicUpdateQuery.format(new_team, mleid)
-            print(queryStr)
-            conn.execute(text(queryStr))
-            conn.commit()
+    values = ''
+    for did, t in players.items():
+        mleid, name, new_team = t
+        if name == 'Nim' or name == 'Spike':
+            print(f'{mleid}, {did}, {name}, {new_team}')
+        values += f"({mleid}, '{new_team}'),\n"
+
+    values = values[:-2]
+    # Now let's put it into the DB:
+    queryStr = basicUpdateQuery.format(values)
+    if not dryRun:
+        conn.execute(text(queryStr))
+        conn.commit()
