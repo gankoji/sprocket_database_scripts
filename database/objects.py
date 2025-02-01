@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 import uuid
 
 @dataclass
@@ -44,6 +45,35 @@ class sScheduleFixture:
     
     def query(self):
         return self.baseString.format(self.scheduleGroupId, self.homeFranchiseId, self.awayFranchiseId)
+
+@dataclass
+class sScheduleGroup:
+    start: str
+    end: str
+    description: str
+    typeId: int
+    gameId: int
+    parentGroupId: Optional[int]
+    baseString: str = """
+        INSERT INTO sprocket.schedule_group
+            (id, "start", "end", "description", "typeId", "gameId",
+            "parentGroupId")
+        VALUES (DEFAULT, {}, {}, {}, {}, {})
+        RETURNING id;
+    """
+
+    seasonString: str = """
+        INSERT INTO sprocket.schedule_group
+            (id, "start", "end", "description", "typeId", "gameId")
+        VALUES (DEFAULT, {}, {}, {}, {})
+        RETURNING id;
+    """
+
+    def query(self):
+        if parentGroupId:
+            return self.baseString.format(self.start, self.end, self.description, self.typeId, self.gameId, self.parentGroupId)
+        else
+            return self.baseString.format(self.start, self.end, self.description, self.typeId, self.gameId)
 
 @dataclass
 class mbFixtures:
@@ -129,6 +159,22 @@ class mMatch:
             self.match_number,
             self.map_name,
         )
+
+@dataclass
+class mSeason:
+    start: str
+    end: str
+    rosterLocked: bool = False
+    numWeeks: int = 10
+    baseString: str = """
+        INSERT INTO mledb.season
+            (id, created_by, created_at, start, end, roster_locked, num_weeks)
+        VALUES (DEFAULT, {}, {}, {}, {}, {}, {})
+        RETURNING id;
+    """
+
+    def query(self):
+        return self.baseString.format("Nigel", timestamp_now(), self.start, self.end, self.rosterLocked, self.numWeeks)
 
 def timestamp_now():
     now = datetime.now()

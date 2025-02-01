@@ -13,11 +13,11 @@ from
 	sprocket.user u
 inner join sprocket.user_authentication_account uaa on
 	uaa."userId" = u.id
-inner join sprocket.member m on
+left join sprocket.member m on
 	m."userId" = u.id
-inner join sprocket.member_platform_account mpa on
+left join sprocket.member_platform_account mpa on
 	m.id = mpa."memberId"
-inner join sprocket.player p on
+left join sprocket.player p on
 	p."memberId" = m.id
 where
 	uaa."accountId" = '1121581950734438411';
@@ -25,10 +25,12 @@ where
 create temp table all_mledb_ids as 
 select 
 	mlep.id as "mle_player",
-	mlepa.id as "mle_player_account"
+	mlep.mleid as "mleid",
+	mlepa.id as "mle_player_account",
+	mlep.discord_id as "discord_id"
 from
 	mledb.player mlep
-inner join mledb.player_account mlepa on
+left join mledb.player_account mlepa on
 	mlepa.player_id = mlep.id
 where
 	mlep.discord_id = '1121581950734438411';
@@ -65,11 +67,41 @@ where
 
 delete
 from
-	mledb.player p
+	mledb.elo_data ed
 where
-	p.id in (
+	ed.player_id in (
+		select
+			mle_player
+		from
+			all_mledb_ids);
+
+delete
+from
+	mledb.player_stats ps
+where
+	ps.player_id in (
+		select
+			mle_player
+		from
+			all_mledb_ids);
+
+delete
+from
+	mledb.player_stats_core psc
+where
+	psc.player_id in (
+		select
+			mle_player
+		from
+			all_mledb_ids);
+
+delete
+from
+	mledb.player_history ph
+where 
+	ph.discord_id in (
 	select
-		mle_player
+		discord_id
 	from
 		all_mledb_ids);
 
@@ -118,6 +150,16 @@ from
 	sprocket.member_profile mp
 where
 	mp."memberId" in (
+	select
+		member
+	from
+		all_sprocket_ids);
+
+delete
+from
+	sprocket.member_restriction mr
+where 
+	mr."memberId" in (
 	select
 		member
 	from
