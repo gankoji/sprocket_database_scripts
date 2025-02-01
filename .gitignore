@@ -6,3 +6,4 @@ bin/
 lib/
 inputs/
 pyvenv.cfg
+database/__pycache__/objects.cpython-313.pyc

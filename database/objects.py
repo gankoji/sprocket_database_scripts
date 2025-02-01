@@ -58,22 +58,22 @@ class sScheduleGroup:
         INSERT INTO sprocket.schedule_group
             (id, "start", "end", "description", "typeId", "gameId",
             "parentGroupId")
-        VALUES (DEFAULT, {}, {}, {}, {}, {})
+        VALUES (DEFAULT, '{}', '{}', '{}', {}, {}, {})
         RETURNING id;
     """
 
     seasonString: str = """
         INSERT INTO sprocket.schedule_group
             (id, "start", "end", "description", "typeId", "gameId")
-        VALUES (DEFAULT, {}, {}, {}, {})
+        VALUES (DEFAULT, '{}', '{}', '{}', {}, {})
         RETURNING id;
     """
 
     def query(self):
-        if parentGroupId:
+        if self.parentGroupId:
             return self.baseString.format(self.start, self.end, self.description, self.typeId, self.gameId, self.parentGroupId)
-        else
-            return self.baseString.format(self.start, self.end, self.description, self.typeId, self.gameId)
+        else:
+            return self.seasonString.format(self.start, self.end, self.description, self.typeId, self.gameId)
 
 @dataclass
 class mbFixtures:
@@ -142,9 +142,9 @@ class mMatch:
     map_name: str = "CHAMPIONS_FIELD"
     baseString: str = """
         INSERT INTO mledb.match
-            (id, created_by, created_at, from, to, is_double_header, season,
+            (id, created_by, created_at, "from", "to", is_double_header, season,
             match_number, map)
-        VALUES(DEFAULT, {}, {}, {}, {}, {}, {}, {}, {})
+        VALUES(DEFAULT, '{}', '{}', '{}', '{}', {}, {}, {}, '{}')
         RETURNING id;
     """
 
@@ -162,19 +162,20 @@ class mMatch:
 
 @dataclass
 class mSeason:
+    seasonNumber: int
     start: str
     end: str
     rosterLocked: bool = False
     numWeeks: int = 10
     baseString: str = """
         INSERT INTO mledb.season
-            (id, created_by, created_at, start, end, roster_locked, num_weeks)
-        VALUES (DEFAULT, {}, {}, {}, {}, {}, {})
-        RETURNING id;
+            (season_number, created_by, created_at, start_date, end_date, roster_locked, week_length)
+        VALUES ({}, '{}', '{}', '{}', '{}', {}, {})
+        RETURNING season_number;
     """
 
     def query(self):
-        return self.baseString.format("Nigel", timestamp_now(), self.start, self.end, self.rosterLocked, self.numWeeks)
+        return self.baseString.format(self.seasonNumber, "Nigel", timestamp_now(), self.start, self.end, self.rosterLocked, self.numWeeks)
 
 def timestamp_now():
     now = datetime.now()
