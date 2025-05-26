@@ -1,61 +1,61 @@
 Match #,Home Team,Away Team,Game Mode,Skill Group,Day,Time
-1, Aviators   , Jets       , DOUBLES, ACADEMY    ,Sunday,9 PM
-1, Aviators   , Jets       , STANDARD, CHAMPION   ,Saturday,9 PM
-1, Demolition , Flames     , STANDARD, CHAMPION   ,Sunday,8 PM
-1, Foxes      , Tyrants    , STANDARD, CHAMPION   ,Saturday,9 PM
-1, Hawks      , Pirates    , STANDARD, MASTER     ,Saturday,8 PM
-1, Hive       , Hurricanes , DOUBLES, ACADEMY    ,Saturday,7 PM
-2, Blizzard   , Lightning  , STANDARD, MASTER     ,Saturday,8 PM
-2, Express    , Knights    , STANDARD, ACADEMY    ,Sunday,7 PM
-2, Flames     , Elite      , STANDARD, ACADEMY    ,Sunday,7 PM
-2, Jets       , Hurricanes , DOUBLES, CHAMPION   ,Saturday,9 PM
-2, Rhinos     , Pandas     , DOUBLES, PREMIER    ,Saturday,7 PM
-2, Tyrants    , Sabres     , DOUBLES, ACADEMY    ,Saturday,9 PM
-2, Wizards    , Spectre    , DOUBLES, ACADEMY    ,Saturday,7 PM
-2, Wolves     , Shadow     , DOUBLES, ACADEMY    ,Sunday,7 PM
-3, Eclipse    , Wizards    , DOUBLES, MASTER     ,Saturday,7 PM
-3, Knights    , Spartans   , STANDARD, CHAMPION   ,Sunday,9 PM
-3, Outlaws    , Express    , DOUBLES, PREMIER    ,Sunday,7 PM
-3, Puffins    , Tyrants    , DOUBLES, CHAMPION   ,Saturday,8 PM
-3, Puffins    , Tyrants    , DOUBLES, FOUNDATION ,Saturday,8 PM
-4, Aviators   , Wolves     , STANDARD, ACADEMY    ,Sunday,7 PM
-4, Aviators   , Wolves     , DOUBLES, CHAMPION   ,Sunday,9 PM
-4, Express    , Rhinos     , DOUBLES, MASTER     ,Sunday,7 PM
-4, Hawks      , Demolition , DOUBLES, ACADEMY    ,Sunday,9 PM
-4, Hawks      , Demolition , DOUBLES, CHAMPION   ,Sunday,8 PM
-4, Pirates    , Dodgers    , DOUBLES, ACADEMY    ,Sunday,8 PM
-4, Sabres     , Eclipse    , DOUBLES, FOUNDATION ,Saturday,7 PM
-5, Blizzard   , Hurricanes , DOUBLES, MASTER     ,Sunday,9 PM
-5, Bulls      , Spartans   , STANDARD, ACADEMY    ,Saturday,8 PM
-5, Shadow     , Aviators   , DOUBLES, MASTER     ,Sunday,7 PM
-5, Spectre    , Foxes      , STANDARD, FOUNDATION ,Saturday,7 PM
-5, Wizards    , Puffins    , STANDARD, FOUNDATION ,Sunday,8 PM
-6, Express    , Bulls      , STANDARD, CHAMPION   ,Sunday,7 PM
-6, Express    , Bulls      , STANDARD, MASTER     ,Saturday,8 PM
-6, Express    , Bulls      , STANDARD, PREMIER    ,Sunday,7 PM
-6, Foxes      , Eclipse    , STANDARD, MASTER     ,Saturday,9 PM
-6, Hawks      , Elite      , DOUBLES, FOUNDATION ,Saturday,7 PM
-6, Hive       , Shadow     , STANDARD, ACADEMY    ,Saturday,9 PM
-6, Jets       , Blizzard   , STANDARD, PREMIER    ,Sunday,7 PM
-6, Knights    , Pandas     , STANDARD, MASTER     ,Saturday,9 PM
-6, Puffins    , Spectre    , STANDARD, MASTER     ,Saturday,7 PM
-6, Sharks     , Demolition , STANDARD, FOUNDATION ,Sunday,9 PM
-6, Tyrants    , Comets     , DOUBLES, MASTER     ,Saturday,9 PM
-7, Blizzard   , Aviators   , DOUBLES, PREMIER    ,Sunday,9 PM
-7, Elite      , Pirates    , DOUBLES, MASTER     ,Saturday,8 PM
-7, Flames     , Sharks     , DOUBLES, FOUNDATION ,Sunday,8 PM
-7, Lightning  , Hive       , DOUBLES, MASTER     ,Sunday,8 PM
-7, Pandas     , Outlaws    , DOUBLES, ACADEMY    ,Saturday,8 PM
-7, Rhinos     , Spartans   , DOUBLES, ACADEMY    ,Sunday,8 PM
-7, Shadow     , Hurricanes , STANDARD, CHAMPION   ,Sunday,9 PM
-8, Bears      , Pandas     , DOUBLES, MASTER     ,Sunday,8 PM
-8, Ducks      , Pirates    , STANDARD, ACADEMY    ,Sunday,9 PM
-8, Flames     , Dodgers    , DOUBLES, MASTER     ,Saturday,7 PM
-8, Jets       , Hive       , STANDARD, MASTER     ,Saturday,7 PM
-9, Lightning  , Blizzard   , DOUBLES, CHAMPION   ,Sunday,8 PM
-9, Pandas     , Rhinos     , STANDARD, ACADEMY    ,Saturday,8 PM
-9, Pirates    , Sharks     , DOUBLES, CHAMPION   ,Sunday,9 PM
-9, Puffins    , Foxes      , DOUBLES, ACADEMY    ,Saturday,9 PM
-9, Sabres     , Tyrants    , STANDARD, ACADEMY    ,Saturday,9 PM
-10, Elite      , Dodgers    , STANDARD, FOUNDATION ,Saturday,8 PM
-10, Sabres     , Puffins    , DOUBLES, MASTER     ,Sunday,8 PM
+1,Aviators,Jets,DOUBLES,ACADEMY,Saturday,8 PM
+1,Aviators,Jets,DOUBLES,CHAMPION,Saturday,7 PM
+1,Blizzard,Wolves,DOUBLES,CHAMPION,Sunday,9 PM
+1,Blizzard,Wolves,STANDARD,MASTER,Sunday,7 PM
+1,Blizzard,Wolves,STANDARD,PREMIER,Sunday,8 PM
+1,Comets,Wizards,DOUBLES,FOUNDATION,Saturday,9 PM
+2,Demolition,Dodgers,STANDARD,ACADEMY,Saturday,9 PM
+2,Ducks,Hawks,STANDARD,ACADEMY,Sunday,9 PM
+2,Express,Knights,STANDARD,CHAMPION,Sunday,7 PM
+2,Express,Knights,DOUBLES,PREMIER,Saturday,8 PM
+2,Foxes,Puffins,DOUBLES,CHAMPION,Saturday,7 PM
+2,Spartans,Outlaws,STANDARD,MASTER,Sunday,8 PM
+3,Bulls,Rhinos,STANDARD,PREMIER,Saturday,7 PM
+3,Eclipse,Wizards,DOUBLES,CHAMPION,Sunday,8 PM
+3,Elite,Demolition,DOUBLES,CHAMPION,Sunday,7 PM
+3,Elite,Demolition,STANDARD,MASTER,Saturday,8 PM
+3,Pandas,Bears,DOUBLES,CHAMPION,Saturday,9 PM
+3,Pandas,Bears,DOUBLES,PREMIER,Sunday,9 PM
+4,Ducks,Flames,DOUBLES,CHAMPION,Sunday,8 PM
+4,Ducks,Flames,STANDARD,FOUNDATION,Saturday,8 PM
+4,Hawks,Demolition,DOUBLES,FOUNDATION,Sunday,9 PM
+4,Pirates,Dodgers,DOUBLES,CHAMPION,Saturday,7 PM
+4,Sabres,Eclipse,DOUBLES,FOUNDATION,Sunday,7 PM
+4,Tyrants,Spectre,DOUBLES,CHAMPION,Saturday,9 PM
+5,Comets,Sabres,DOUBLES,CHAMPION,Sunday,7 PM
+5,Dodgers,Sharks,DOUBLES,FOUNDATION,Saturday,9 PM
+5,Lightning,Jets,DOUBLES,MASTER,Sunday,9 PM
+5,Lightning,Jets,DOUBLES,PREMIER,Saturday,8 PM
+5,Spectre,Foxes,DOUBLES,ACADEMY,Sunday,8 PM
+5,Spectre,Foxes,STANDARD,FOUNDATION,Saturday,7 PM
+6,Ducks,Dodgers,DOUBLES,MASTER,Saturday,9 PM
+6,Express,Bulls,STANDARD,ACADEMY,Sunday,8 PM
+6,Hive,Shadow,STANDARD,MASTER,Sunday,7 PM
+6,Hive,Shadow,STANDARD,PREMIER,Sunday,9 PM
+6,Sabres,Wizards,DOUBLES,ACADEMY,Saturday,8 PM
+6,Spartans,Bears,STANDARD,ACADEMY,Saturday,7 PM
+7,Bulls,Knights,STANDARD,MASTER,Sunday,9 PM
+7,Comets,Foxes,STANDARD,MASTER,Sunday,7 PM
+7,Eclipse,Puffins,STANDARD,MASTER,Sunday,8 PM
+7,Flames,Sharks,STANDARD,MASTER,Saturday,7 PM
+7,Spectre,Sabres,STANDARD,MASTER,Saturday,9 PM
+7,Wizards,Tyrants,STANDARD,MASTER,Saturday,8 PM
+8,Aviators,Hurricanes,DOUBLES,PREMIER,Saturday,8 PM
+8,Bears,Pandas,STANDARD,MASTER,Sunday,7 PM
+8,Rhinos,Bulls,STANDARD,CHAMPION,Saturday,7 PM
+8,Sharks,Hawks,STANDARD,CHAMPION,Saturday,9 PM
+8,Tyrants,Puffins,STANDARD,ACADEMY,Sunday,8 PM
+8,Tyrants,Puffins,STANDARD,FOUNDATION,Sunday,9 PM
+9,Eclipse,Comets,STANDARD,ACADEMY,Sunday,7 PM
+9,Elite,Flames,DOUBLES,ACADEMY,Sunday,9 PM
+9,Outlaws,Spartans,STANDARD,CHAMPION,Saturday,9 PM
+9,Outlaws,Spartans,DOUBLES,PREMIER,Saturday,7 PM
+9,Pandas,Rhinos,STANDARD,ACADEMY,Sunday,8 PM
+9,Pirates,Sharks,STANDARD,ACADEMY,Saturday,8 PM
+10,Hurricanes,Hive,DOUBLES,ACADEMY,Sunday,9 PM
+10,Hurricanes,Hive,STANDARD,CHAMPION,Saturday,8 PM
+10,Outlaws,Knights,DOUBLES,ACADEMY,Sunday,7 PM
+10,Pirates,Hawks,STANDARD,MASTER,Saturday,7 PM
+10,Shadow,Lightning,DOUBLES,ACADEMY,Sunday,8 PM
+10,Wolves,Blizzard,DOUBLES,ACADEMY,Saturday,9 PM
