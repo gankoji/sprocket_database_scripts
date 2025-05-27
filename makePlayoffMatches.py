@@ -1,6 +1,7 @@
 import sys
 import csv
 import os
+import argparse
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
@@ -26,7 +27,11 @@ if not all([db_host, db_port, db_user, db_password, db_name]):
 DATABASE_URL = f'postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
 # Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+if args.dry_run:
+    # Echo SQL statements without executing them
+    engine = create_engine(DATABASE_URL, echo=True, execution_options={"synchronize_session": "fetch"})
+else:
+    engine = create_engine(DATABASE_URL)
 
 # Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -67,18 +72,22 @@ matchDetails = {
     24: (179, "2025-05-29 04:00:00.000", "2025-06-09 03:59:00.000"),
 }
 
-# Check for command-line argument for CSV file path
-if len(sys.argv) < 2:
-    print("Usage: python makePlayoffMatches.py <csv_file_path>")
-    sys.exit(1)
+# Set up command line argument parsing
+parser = argparse.ArgumentParser(description='Create playoff matches from CSV data')
+parser.add_argument('csv_file', help='Path to the CSV file containing match data')
+parser.add_argument('--dry-run', action='store_true', help='Only print SQL statements without executing them')
+args = parser.parse_args()
 
-csv_file_path = sys.argv[1]
+csv_file_path = args.csv_file
 
 # Use the session to interact with the database
 with SessionLocal() as session:
     try:
         # Begin a transaction
         with session.begin():
+            if args.dry_run:
+                # Configure session to not actually execute SQL
+                session.execute = lambda *args, **kwargs: print(f"SQL: {args[0]}")
             # First, build a map from franchise name (home name, away name in the input)
             # to franchise ID using direct query (can be replaced by ORM query if needed)
             franchiseNameToId = {}
@@ -232,7 +241,12 @@ with SessionLocal() as session:
 
             # If the loop completes without exceptions, the transaction will be committed
             # automatically when exiting the `with session.begin():` block.
-            print(f"Successfully processed data from {csv_file_path}.")
+            if args.dry_run:
+                print(f"Dry run completed. SQL statements generated for data from {csv_file_path}.")
+                # Explicitly roll back in dry run mode
+                session.rollback()
+            else:
+                print(f"Successfully processed data from {csv_file_path}.")
 
     except Exception as e:
         # If any exception occurs, the transaction within `session.begin()`
