@@ -100,12 +100,29 @@ with SessionLocal() as session:
             mledb_match_ids = [details[0] for details in matchDetails.values()]
             # Use ORM query to fetch objects
             stmt = session.query(mMatch).filter(mMatch.id.in_(mledb_match_ids))
-            for mledb_match_obj in stmt.all():
-                 mledb_matches[mledb_match_obj.id] = mledb_match_obj
+            result = stmt.all()
+            if result:  # Check if result is not None and not empty
+                for mledb_match_obj in result:
+                    mledb_matches[mledb_match_obj.id] = mledb_match_obj
+            else:
+                print("Warning: No mledb.match objects found for the specified match IDs.")
 
             # Open and read the CSV file
-            with open(csv_file_path) as csvfile:
+            with open(csv_file_path, 'r', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
+                # Check if file is empty
+                try:
+                    # Peek at first row to ensure file has content
+                    has_content = bool(next(reader, None))
+                    # Reset file pointer
+                    csvfile.seek(0)
+                    reader = csv.reader(csvfile)
+                    if not has_content:
+                        print(f"Error: CSV file {csv_file_path} is empty.")
+                        return
+                except Exception as e:
+                    print(f"Error reading CSV file: {e}")
+                    return
                 for i, row in enumerate(reader):
                     if i == 0: # Skip header row
                         continue
@@ -151,12 +168,17 @@ with SessionLocal() as session:
                          print(f"Skipping row {i+1}: Unknown schedule group for match number '{matchNumber}'")
                          continue
 
-                    mledb_match_id_for_fixture = matchDetails.get(matchNumber, [None])[0]
+                    match_detail = matchDetails.get(matchNumber)
+                    if not match_detail:
+                        print(f"Skipping row {i+1}: No match details found for match number '{matchNumber}'")
+                        continue
+                        
+                    mledb_match_id_for_fixture = match_detail[0]
                     mledb_match_instance = mledb_matches.get(mledb_match_id_for_fixture)
 
                     if not mledb_match_instance:
-                         print(f"Skipping row {i+1}: Could not find mledb.match object for match number '{matchNumber}' (ID {mledb_match_id_for_fixture})")
-                         continue
+                        print(f"Skipping row {i+1}: Could not find mledb.match object for match number '{matchNumber}' (ID {mledb_match_id_for_fixture})")
+                        continue
 
                     # --- Create and link ORM objects ---
 
