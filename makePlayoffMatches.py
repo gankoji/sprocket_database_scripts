@@ -26,6 +26,7 @@ if not all([db_host, db_port, db_user, db_password, db_name]):
 # Construct the database URL
 DATABASE_URL = f'postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
+
 # Create SQLAlchemy engine
 if args.dry_run:
     # Echo SQL statements without executing them
