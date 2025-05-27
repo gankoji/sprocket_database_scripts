@@ -5,3 +5,4 @@ include/
 inputs/
 pyvenv.cfg
 __pycache__
+.aider*

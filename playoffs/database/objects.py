@@ -264,4 +264,3 @@ if __name__ == '__main__':
 
     print("\nNote: IDs are assigned by the database upon successful insertion, typically after session.add() and session.flush() or session.commit().")
     print("You would use a SQLAlchemy Session to persist these objects to the database.")
-```
