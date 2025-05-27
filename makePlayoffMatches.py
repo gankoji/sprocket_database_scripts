@@ -35,11 +35,7 @@ args = parser.parse_args()
 csv_file_path = args.csv_file
 
 # Create SQLAlchemy engine
-if args.dry_run:
-    # Echo SQL statements without executing them
-    engine = create_engine(DATABASE_URL, echo=True, execution_options={"synchronize_session": "fetch"})
-else:
-    engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=args.dry_run)
 
 # Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -85,9 +81,10 @@ with SessionLocal() as session:
     try:
         # Begin a transaction
         with session.begin():
+            # For dry run, we'll collect all operations and print them at the end
             if args.dry_run:
-                # Configure session to not actually execute SQL
-                session.execute = lambda *args, **kwargs: print(f"SQL: {args[0]}")
+                # This will make SQLAlchemy collect SQL statements without executing them
+                session.connection(execution_options={"synchronize_session": "fetch"})
             # First, build a map from franchise name (home name, away name in the input)
             # to franchise ID using direct query (can be replaced by ORM query if needed)
             franchiseNameToId = {}
