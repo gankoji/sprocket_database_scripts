@@ -26,6 +26,13 @@ if not all([db_host, db_port, db_user, db_password, db_name]):
 # Construct the database URL
 DATABASE_URL = f'postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
+# Set up command line argument parsing
+parser = argparse.ArgumentParser(description='Create playoff matches from CSV data')
+parser.add_argument('csv_file', help='Path to the CSV file containing match data')
+parser.add_argument('--dry-run', action='store_true', help='Only print SQL statements without executing them')
+args = parser.parse_args()
+
+csv_file_path = args.csv_file
 
 # Create SQLAlchemy engine
 if args.dry_run:
@@ -72,14 +79,6 @@ matchDetails = {
     23: (178, "2025-05-22 04:00:00.000", "2025-05-26 03:59:00.000"),
     24: (179, "2025-05-29 04:00:00.000", "2025-06-09 03:59:00.000"),
 }
-
-# Set up command line argument parsing
-parser = argparse.ArgumentParser(description='Create playoff matches from CSV data')
-parser.add_argument('csv_file', help='Path to the CSV file containing match data')
-parser.add_argument('--dry-run', action='store_true', help='Only print SQL statements without executing them')
-args = parser.parse_args()
-
-csv_file_path = args.csv_file
 
 # Use the session to interact with the database
 with SessionLocal() as session:
