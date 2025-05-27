@@ -119,10 +119,12 @@ with SessionLocal() as session:
                     reader = csv.reader(csvfile)
                     if not has_content:
                         print(f"Error: CSV file {csv_file_path} is empty.")
-                        continue  # Skip processing but continue execution
+                        # Skip to the end of the with block
+                        reader = []  # Empty the reader to skip processing
                 except Exception as e:
                     print(f"Error reading CSV file: {e}")
-                    break  # Exit the CSV processing loop
+                    # Skip to the end of the with block
+                    reader = []  # Empty the reader to skip processing
                 for i, row in enumerate(reader):
                     if i == 0: # Skip header row
                         continue
