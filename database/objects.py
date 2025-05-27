@@ -1,188 +1,267 @@
-from dataclasses import dataclass
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, Uuid
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
-from typing import Optional
 import uuid
 
-@dataclass
-class sMatch:
-    skillGroupId: int
-    matchParentId: int
-    gameModeId: int
-    baseString: str = """
-        INSERT INTO sprocket.match
-            (id, "isDummy", "submissionId", "skillGroupId", "matchParentId", "gameModeId")
-        VALUES (DEFAULT, false, 'match-{}', {}, {}, {})
-        RETURNING id;
-    """
+# Define the base for declarative models
+Base = declarative_base()
 
-    def query(self):
-        return self.baseString.format(uuid.uuid4(), self.skillGroupId, self.matchParentId, self.gameModeId)
-
-@dataclass
-class sMatchParent:
-    fixtureId: int
-    baseString: str = """
-        INSERT INTO sprocket.match_parent
-            (id, "fixtureId")
-        VALUES (DEFAULT, {})
-        RETURNING id;
-    """
-
-    def query(self):
-        return self.baseString.format(self.fixtureId)
-    
-@dataclass
-class sScheduleFixture:
-    scheduleGroupId: int
-    homeFranchiseId: int
-    awayFranchiseId: int
-    baseString: str = """
-        INSERT INTO sprocket.schedule_fixture
-            (id, "scheduleGroupId", "homeFranchiseId", "awayFranchiseId")
-        VALUES (DEFAULT, {}, {}, {})
-        RETURNING id;
-    """
-    
-    def query(self):
-        return self.baseString.format(self.scheduleGroupId, self.homeFranchiseId, self.awayFranchiseId)
-
-@dataclass
-class sScheduleGroup:
-    start: str
-    end: str
-    description: str
-    typeId: int
-    gameId: int
-    parentGroupId: Optional[int]
-    baseString: str = """
-        INSERT INTO sprocket.schedule_group
-            (id, "start", "end", "description", "typeId", "gameId",
-            "parentGroupId")
-        VALUES (DEFAULT, '{}', '{}', '{}', {}, {}, {})
-        RETURNING id;
-    """
-
-    seasonString: str = """
-        INSERT INTO sprocket.schedule_group
-            (id, "start", "end", "description", "typeId", "gameId")
-        VALUES (DEFAULT, '{}', '{}', '{}', {}, {})
-        RETURNING id;
-    """
-
-    def query(self):
-        if self.parentGroupId:
-            return self.baseString.format(self.start, self.end, self.description, self.typeId, self.gameId, self.parentGroupId)
-        else:
-            return self.seasonString.format(self.start, self.end, self.description, self.typeId, self.gameId)
-
-@dataclass
-class mbFixtures:
-    mleFixtureId: int
-    sprocketFixtureId: int
-    baseString: str = """
-        INSERT INTO mledb_bridge.fixture_to_fixture
-            ("mleFixtureId", "sprocketFixtureId")
-        VALUES ({}, {})
-    """
-
-    def query(self):
-        return self.baseString.format(self.mleFixtureId, self.sprocketFixtureId)
-
-@dataclass
-class mbMatchToScheduleGroup:
-    matchId: int
-    weekScheduleGroupId: int
-    baseString: str = """
-        INSERT INTO mledb_bridge.match_to_schedule_group
-            ("matchId", "weekScheduleGroupId")
-        VALUES ({}, {})
-    """
-
-    def query(self):
-        return self.baseString.format(self.matchId, self.weekScheduleGroupId)
-
-@dataclass
-class mSeries:
-    league: str
-    mode: str
-    fixture_id: int
-    full_ncp: bool = False
-    baseString: str = """
-        INSERT INTO mledb.series
-            (id, league, full_ncp, mode, fixture_id, updated_by)
-        VALUES (DEFAULT, '{}', {}, '{}', {}, 'Playoffs')
-        RETURNING id;
-    """
-    
-    def query(self):
-        return self.baseString.format(self.league, self.full_ncp, self.mode, self.fixture_id)
-    
-@dataclass
-class mFixture:
-    match_id: int
-    home_name: str
-    away_name: str
-    baseString: str = """
-        INSERT INTO mledb.fixture
-            (id, match_id, home_name, away_name)
-        VALUES (DEFAULT, {}, '{}', '{}')
-        RETURNING id;
-    """
-
-    def query(self):
-        return self.baseString.format(self.match_id, self.home_name, self.away_name)
-
-@dataclass
-class mMatch:
-    from_date: str
-    to_date: str
-    season: int
-    match_number: int
-    is_double_header: bool = False
-    map_name: str = "CHAMPIONS_FIELD"
-    baseString: str = """
-        INSERT INTO mledb.match
-            (id, created_by, created_at, "from", "to", is_double_header, season,
-            match_number, map)
-        VALUES(DEFAULT, '{}', '{}', '{}', '{}', {}, {}, {}, '{}')
-        RETURNING id;
-    """
-
-    def query(self):
-        return self.baseString.format(
-            "Nigel",
-            timestamp_now(),
-            self.from_date,
-            self.to_date, 
-            self.is_double_header,
-            self.season, 
-            self.match_number,
-            self.map_name,
-        )
-
-@dataclass
-class mSeason:
-    seasonNumber: int
-    start: str
-    end: str
-    rosterLocked: bool = False
-    numWeeks: int = 10
-    baseString: str = """
-        INSERT INTO mledb.season
-            (season_number, created_by, created_at, start_date, end_date, roster_locked, week_length)
-        VALUES ({}, '{}', '{}', '{}', '{}', {}, {})
-        RETURNING season_number;
-    """
-
-    def query(self):
-        return self.baseString.format(self.seasonNumber, "Nigel", timestamp_now(), self.start, self.end, self.rosterLocked, self.numWeeks)
-
+# Helper function (kept for now, but ORM DateTime handling is preferred)
 def timestamp_now():
     now = datetime.now()
-    return now.strftime("%Y-%m-%d %H:%M:%S") + " -0700"
+    # This format seems specific, might need adjustment depending on DB precision/timezone handling
+    return now.strftime("%Y-%m-%d %H:%M:%S") # Assuming DB handles timezone if column is timestamptz, otherwise matches timestamp without time zone
 
-if __name__ == 'main':
-    match = sMatch(2, 1000, 14)
-    print(match.query())
-    fix = mFixture(1, 'Puffins', 'Sabres')
-    print(fix.query())
+
+# Sprocket Schema Models
+class sScheduleGroup(Base):
+    __tablename__ = 'schedule_group'
+    __table_args__ = {'schema': 'sprocket'}
+
+    id = Column(Integer, primary_key=True)
+    createdAt = Column('createdAt', DateTime, default=datetime.now, nullable=False)
+    updatedAt = Column('updatedAt', DateTime, default=datetime.now, nullable=False)
+    deletedAt = Column('deletedAt', DateTime, nullable=True)
+    start = Column(DateTime, nullable=False)
+    end = Column('end', DateTime, nullable=False) # Renamed column in schema is 'end'
+    description = Column(String, nullable=True)
+    typeId = Column('typeId', Integer, nullable=True) # Assuming FK to schedule_group_type, not defined here
+    gameId = Column('gameId', Integer, nullable=True)
+    parentGroupId = Column('parentGroupId', Integer, ForeignKey('sprocket.schedule_group.id'), nullable=True)
+
+    # Relationships
+    parent = relationship("sScheduleGroup", remote_side=[id], backref="child_groups")
+    fixtures = relationship("sScheduleFixture", back_populates="schedule_group")
+
+
+class sScheduleFixture(Base):
+    __tablename__ = 'schedule_fixture'
+    __table_args__ = {'schema': 'sprocket'}
+
+    id = Column(Integer, primary_key=True)
+    createdAt = Column('createdAt', DateTime, default=datetime.now, nullable=False)
+    updatedAt = Column('updatedAt', DateTime, default=datetime.now, nullable=False)
+    deletedAt = Column('deletedAt', DateTime, nullable=True)
+    scheduleGroupId = Column('scheduleGroupId', Integer, ForeignKey('sprocket.schedule_group.id'), nullable=True)
+    homeFranchiseId = Column('homeFranchiseId', Integer, nullable=True) # Assuming FK elsewhere
+    awayFranchiseId = Column('awayFranchiseId', Integer, nullable=True) # Assuming FK elsewhere
+
+    # Relationships
+    schedule_group = relationship("sScheduleGroup", back_populates="fixtures")
+    match_parent = relationship("sMatchParent", back_populates="fixture", uselist=False)
+    bridge_entry = relationship("mbFixtures", back_populates="sprocket_fixture", uselist=False) # Assuming one-to-one or one-to-zero
+
+
+class sMatchParent(Base):
+    __tablename__ = 'match_parent'
+    __table_args__ = {'schema': 'sprocket'}
+
+    id = Column(Integer, primary_key=True)
+    createdAt = Column('createdAt', DateTime, default=datetime.now, nullable=False)
+    updatedAt = Column('updatedAt', DateTime, default=datetime.now, nullable=False)
+    deletedAt = Column('deletedAt', DateTime, nullable=True)
+    eventId = Column('eventId', Integer, nullable=True)
+    scrimMetaId = Column('scrimMetaId', Integer, nullable=True)
+    fixtureId = Column('fixtureId', Integer, ForeignKey('sprocket.schedule_fixture.id'), nullable=True)
+
+    # Relationships
+    fixture = relationship("sScheduleFixture", back_populates="match_parent")
+    match = relationship("sMatch", back_populates="match_parent", uselist=False) # Assuming one-to-one or one-to-zero
+
+
+class sMatch(Base):
+    __tablename__ = 'match'
+    __table_args__ = {'schema': 'sprocket'}
+
+    # Schema says integer PK, sequence generated by DB typically.
+    id = Column(Integer, primary_key=True)
+    createdAt = Column('createdAt', DateTime, default=datetime.now, nullable=False)
+    updatedAt = Column('updatedAt', DateTime, default=datetime.now, nullable=False)
+    deletedAt = Column('deletedAt', DateTime, nullable=True)
+    isDummy = Column('isDummy', Boolean, default=False, nullable=False)
+    # Schema says character varying, nullable=True. Original script generated UUID, keeping as String.
+    submissionId = Column('submissionId', String, nullable=True)
+    skillGroupId = Column('skillGroupId', Integer, nullable=False) # Assuming FK elsewhere
+    matchParentId = Column('matchParentId', Integer, ForeignKey('sprocket.match_parent.id'), nullable=True)
+    gameModeId = Column('gameModeId', Integer, nullable=True) # Assuming FK elsewhere
+    invalidationId = Column('invalidationId', Integer, nullable=True)
+
+    # Relationships
+    match_parent = relationship("sMatchParent", back_populates="match")
+
+
+# MLEDB Schema Models
+class mMatch(Base):
+    __tablename__ = 'match'
+    __table_args__ = {'schema': 'mledb'}
+
+    id = Column(Integer, primary_key=True)
+    created_by = Column(String(255), default='Unknown', nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_by = Column(String(255), default='Unknown', nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, nullable=False)
+    from_date = Column('from', DateTime(timezone=True), nullable=False) # Schema has timestamp with time zone
+    to_date = Column('to', DateTime(timezone=True), nullable=False)   # Schema has timestamp with time zone
+    is_double_header = Column(Boolean, nullable=False)
+    season = Column(Integer, nullable=False) # Assuming FK to mledb.season, not defined here
+    match_number = Column(Integer, nullable=False)
+    map_name = Column('map', String(255), default='CHAMPIONS_FIELD', nullable=False)
+
+    # Relationships
+    fixtures = relationship("mFixture", back_populates="mledb_match") # Assuming mledb.fixture.match_id is FK
+
+
+class mSeason(Base):
+    __tablename__ = 'season'
+    __table_args__ = {'schema': 'mledb'}
+
+    season_number = Column(Integer, primary_key=True) # PK name is season_number
+    created_by = Column(String(255), default='Unknown', nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_by = Column(String(255), default='Unknown', nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, nullable=False)
+    start_date = Column(DateTime(timezone=True), nullable=False) # Schema has timestamp with time zone
+    end_date = Column(DateTime(timezone=True), nullable=False)   # Schema has timestamp with time zone
+    roster_locked = Column(Boolean, default=False, nullable=False)
+    week_length = Column(Integer, default=7, nullable=False)
+
+
+class mFixture(Base):
+    __tablename__ = 'fixture'
+    __table_args__ = {'schema': 'mledb'}
+
+    id = Column(Integer, primary_key=True)
+    created_by = Column(String(255), default='Unknown', nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_by = Column(String(255), default='Unknown', nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, nullable=False)
+    home_name = Column(String(255), nullable=False)
+    away_name = Column(String(255), nullable=False)
+    match_id = Column(Integer, ForeignKey('mledb.match.id'), nullable=False)
+    channel_id = Column(String(255), default='', nullable=False)
+
+    # Relationships
+    mledb_match = relationship("mMatch", back_populates="fixtures")
+    series = relationship("mSeries", back_populates="fixture")
+    bridge_entry = relationship("mbFixtures", back_populates="mle_fixture", uselist=False) # Assuming one-to-one or one-to-zero
+
+
+class mSeries(Base):
+    __tablename__ = 'series'
+    __table_args__ = {'schema': 'mledb'}
+
+    id = Column(Integer, primary_key=True)
+    created_by = Column(String(255), default='Unknown', nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_by = Column(String(255), default='Unknown', nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, nullable=False)
+    league = Column(String(255), default='UNKNOWN', nullable=False)
+    submission_timestamp = Column(DateTime(timezone=True), nullable=True)
+    scheduled_time = Column(DateTime(timezone=True), nullable=True)
+    full_ncp = Column(Boolean, default=False, nullable=False)
+    mode = Column(String, nullable=False) # Using String for TEXT type, check constraint not modelled directly
+    fixture_id = Column(Integer, ForeignKey('mledb.fixture.id'), nullable=True) # Schema says nullable=True
+    scrim_id = Column(Integer, nullable=True)
+    stream_event_message_id = Column(String(255), nullable=True)
+
+    # Relationships
+    fixture = relationship("mFixture", back_populates="series")
+
+
+# MLEDB Bridge Schema Models
+class mbFixtures(Base):
+    __tablename__ = 'fixture_to_fixture'
+    __table_args__ = {'schema': 'mledb_bridge'}
+    # Primary Key and Foreign Keys
+    id = Column(Integer, primary_key=True)
+    mleFixtureId = Column('mleFixtureId', Integer, ForeignKey('mledb.fixture.id'), nullable=False) # Based on schema
+    sprocketFixtureId = Column('sprocketFixtureId', Integer, ForeignKey('sprocket.schedule_fixture.id'), nullable=False) # Based on schema
+
+    # Relationships
+    mle_fixture = relationship('mFixture', back_populates='bridge_entry')
+    sprocket_fixture = relationship('sScheduleFixture', back_populates='bridge_entry')
+
+
+class mbMatchToScheduleGroup(Base):
+    __tablename__ = 'match_to_schedule_group'
+    __table_args__ = {'schema': 'mledb_bridge'}
+    # Primary Key
+    id = Column(Integer, primary_key=True)
+    matchId = Column('matchId', Integer, nullable=False) # Based on schema, FK assumed elsewhere
+    weekScheduleGroupId = Column('weekScheduleGroupId', Integer, nullable=False) # Based on schema, FK assumed elsewhere
+
+
+# Example usage (updated for ORM)
+if __name__ == '__main__':
+    print("Demonstrating ORM model instantiation:")
+
+    # Example mMatch creation (required for mFixture FK)
+    # Dates need to be datetime objects
+    now = datetime.now()
+    match_mledb_instance = mMatch(
+        from_date=now,
+        to_date=now,
+        is_double_header=False,
+        season=1,
+        match_number=21
+    )
+    print(f"Created mledb.match instance: {match_mledb_instance}")
+
+
+    # Example mFixture creation
+    fixture_mledb_instance = mFixture(
+        mledb_match=match_mledb_instance, # Link via relationship
+        home_name='Puffins',
+        away_name='Sabres'
+    )
+    print(f"Created mledb.fixture instance: {fixture_mledb_instance}")
+
+
+    # Example sScheduleGroup creation (required for sScheduleFixture FK)
+    schedule_group_instance = sScheduleGroup(
+        start=now,
+        end=now,
+        description='Playoff Week',
+        typeId=1,
+        gameId=1,
+        parentGroupId=None
+    )
+    print(f"Created sprocket.schedule_group instance: {schedule_group_instance}")
+
+
+    # Example sScheduleFixture creation
+    fixture_sprocket_instance = sScheduleFixture(
+        schedule_group=schedule_group_instance, # Link via relationship
+        homeFranchiseId=1,
+        awayFranchiseId=2
+    )
+    print(f"Created sprocket.schedule_fixture instance: {fixture_sprocket_instance}")
+
+
+    # Example sMatchParent creation
+    match_parent_instance = sMatchParent(
+        fixture=fixture_sprocket_instance # Link via relationship
+    )
+    print(f"Created sprocket.match_parent instance: {match_parent_instance}")
+
+
+    # Example sMatch creation
+    match_sprocket_instance = sMatch(
+        match_parent=match_parent_instance, # Link via relationship
+        skillGroupId=2,
+        gameModeId=14
+        # submissionId will be None by default based on schema
+    )
+    print(f"Created sprocket.match instance: {match_sprocket_instance}")
+
+
+    # Example mbFixtures creation (linking instances)
+    bridge_instance = mbFixtures(
+        mle_fixture=fixture_mledb_instance,
+        sprocket_fixture=fixture_sprocket_instance
+    )
+    print(f"Created mledb_bridge.fixture_to_fixture instance: {bridge_instance}")
+
+    print("\nNote: IDs are assigned by the database upon successful insertion, typically after session.add() and session.flush() or session.commit().")
+    print("You would use a SQLAlchemy Session to persist these objects to the database.")
+```
