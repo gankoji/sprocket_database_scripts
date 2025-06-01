@@ -2,7 +2,7 @@ import sys
 import csv
 import os
 import argparse
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from database.objects import sScheduleFixture, sMatchParent, sMatch, mFixture, mSeries, mbFixtures, mMatch
@@ -34,8 +34,21 @@ args = parser.parse_args()
 
 csv_file_path = args.csv_file
 
-# Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=args.dry_run)
+# Create SQLAlchemy engine with enhanced logging for dry-run
+if args.dry_run:
+    engine = create_engine(DATABASE_URL, echo=True, echo_pool=True)
+
+    # Add event listener to capture all SQL statements in dry-run mode
+    sql_statements = []
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        if statement.strip().upper().startswith(('INSERT', 'UPDATE', 'DELETE')):
+            sql_statements.append(f"-- SQL Statement:\n{statement}\n-- Parameters: {parameters}\n")
+
+else:
+    engine = create_engine(DATABASE_URL, echo=False)
+    sql_statements = []
 
 # Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -80,11 +93,9 @@ matchDetails = {
 with SessionLocal() as session:
     try:
         # Begin a transaction
-        with session.begin():
-            # For dry run, we'll collect all operations and print them at the end
-            if args.dry_run:
-                # This will make SQLAlchemy collect SQL statements without executing them
-                session.connection(execution_options={"synchronize_session": "fetch"})
+        transaction = session.begin()
+
+        try:
             # First, build a map from franchise name (home name, away name in the input)
             # to franchise ID using direct query (can be replaced by ORM query if needed)
             franchiseNameToId = {}
@@ -127,6 +138,11 @@ with SessionLocal() as session:
                     reader = []  # Empty the reader to skip processing
                 for i, row in enumerate(reader):
                     if i == 0: # Skip header row
+                        continue
+
+                    # Skip empty rows or rows with insufficient columns
+                    if len(row) < 5:
+                        print(f"Skipping row {i+1}: Row has insufficient columns (expected 5, got {len(row)})")
                         continue
 
                     # Extract data from CSV row
@@ -174,7 +190,7 @@ with SessionLocal() as session:
                     if not match_detail:
                         print(f"Skipping row {i+1}: No match details found for match number '{matchNumber}'")
                         continue
-                        
+
                     mledb_match_id_for_fixture = match_detail[0]
                     mledb_match_instance = mledb_matches.get(mledb_match_id_for_fixture)
 
@@ -260,21 +276,29 @@ with SessionLocal() as session:
                     )
                     session.add(bridge_entry)
 
-            # If the loop completes without exceptions, the transaction will be committed
-            # automatically when exiting the `with session.begin():` block.
+            # In dry-run mode, flush to generate SQL without committing
             if args.dry_run:
-                print(f"Dry run completed. SQL statements generated for data from {csv_file_path}.")
+                print("\n=== Flushing session to generate INSERT statements ===")
+                session.flush()
+                print("\n=== Generated SQL Statements ===")
+                if sql_statements:
+                    for stmt in sql_statements:
+                        print(stmt)
+                else:
+                    print("No INSERT/UPDATE/DELETE statements were generated.")
+                print("\n=== Dry run completed ===")
+                print(f"Data from {csv_file_path} would be inserted with the above SQL.")
                 # Explicitly roll back in dry run mode
-                session.rollback()
+                transaction.rollback()
             else:
                 print(f"Successfully processed data from {csv_file_path}.")
+                transaction.commit()
+
+        except Exception as e:
+            transaction.rollback()
+            raise e
 
     except Exception as e:
-        # If any exception occurs, the transaction within `session.begin()`
-        # will be automatically rolled back.
+        # If any exception occurs, the transaction will be rolled back above
         print(f"An error occurred: {e}")
-        # The exception is re-raised implicitly by exiting the `with session.begin():` block
-        # if an exception occurred inside it. We can catch it here for reporting.
         sys.exit(1)
-
-# The session is closed automatically when exiting the `with SessionLocal() as session:` block.
