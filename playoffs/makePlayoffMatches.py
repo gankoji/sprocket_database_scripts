@@ -2,6 +2,7 @@ import sys
 import csv
 import os
 import argparse
+import uuid
 from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
@@ -215,7 +216,7 @@ with SessionLocal() as session:
 
                     # Create sMatchParent, linking to sScheduleFixture
                     match_parent = sMatchParent(
-                        fixture=sprocket_fixture
+                        fixture=sprocket_fixture,
                         # createdAt, updatedAt have defaults
                     )
                     session.add(match_parent)
@@ -226,6 +227,7 @@ with SessionLocal() as session:
                         skillGroupId=skillGroupId,
                         gameModeId=gameModeId,
                         # isDummy has default=False
+                        submissionId=f'match-{str(uuid.uuid4())}',
                         # submissionId is nullable, can be left as None or set explicitly
                         # createdAt, updatedAt have defaults
                     )
